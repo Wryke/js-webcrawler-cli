@@ -13,6 +13,8 @@ function printReport(pages){
         const hits = sortedPage[1]
         console.log(`Found ${hits} links to page ${url}`)
     }
+    console.log(``)
+    console.log(`There were ${sortedPages.length} unique links.`)
     console.log("==========")
     console.log("END REPORT")
     console.log("==========")
