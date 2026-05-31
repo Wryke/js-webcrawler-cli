@@ -16,6 +16,7 @@
   "main": "main.js",
   "scripts": {
     "start": "node --no-warnings main.js",
+    "league": "node --no-warnings scrapePlayer.js",
     "test": "jest"
   },
   "devDependencies": {
