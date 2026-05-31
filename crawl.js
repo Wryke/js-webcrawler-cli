@@ -6,28 +6,52 @@ module.exports = {
     crawlPage
 }
 
-async function crawlPage(currentURL){
+async function crawlPage(baseURL, currentURL, pages){
+    // verify base urls are consistent
+    const baseURLObj = new URL(baseURL)
+    const currentURLObj = new URL(currentURL)
+    if(baseURLObj.hostname !== currentURLObj.hostname){
+        return pages
+    }
+
+    // verify page hasn't already been crawled
+    const normalizedCurrentURL = normalizeURL(currentURL)
+    if(pages[normalizedCurrentURL] > 0){
+        pages[normalizedCurrentURL] ++
+        return pages
+    }
+
+    // begin crawling
+    pages[normalizedCurrentURL] = 1
+
     console.log(`Actively crawling ${currentURL}`)
 
+    // crawl a single page
     try {
         const resp = await fetch(currentURL)
 
         // ensure valid status code
         if (resp.status > 399){
             console.log(`error in fetch with status code: ${resp.status} on page: ${currentURL}`)
-            return
+            return pages
         }
 
         const contentType = resp.headers.get("content-type")
         if(!contentType.includes("text/html")){
             console.log(`non html response, content type: ${contentType}, on page: ${currentURL}`)
-            return
+            return pages
         }
 
-        console.log(await resp.text())
+        const htmlBody = await resp.text()
+        const nextURLs = getURLsFromHTML(htmlBody, baseURL)
+
+        for (const nextURL of nextURLs){
+            pages = await crawlPage(baseURL, nextURL, pages)
+        }
     } catch(err) {
         console.log(`error in fetch: ${err.message}, on page: ${currentURL}`)
     }
+    return pages
 }
 
 function getURLsFromHTML(htmlBody, baseURL){
@@ -49,7 +73,7 @@ function getURLsFromHTML(htmlBody, baseURL){
                 const urlObj = new URL(`${linkElement.href}`)
                 urls.push(urlObj.href)
             } catch (err) {
-                console.log(`error with absolute url: ${err.message}`)
+                console.log(`with absolute url: ${err.message}`)
             }
         }
     }

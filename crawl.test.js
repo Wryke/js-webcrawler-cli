@@ -85,7 +85,7 @@ test(`getURLsFromHTML Invalid`, () => {
     <html>
         <body>
             <a href="invalid">
-                Invalid URL
+                Invalid URL TEST
             </a>
         </body>
     </html>
